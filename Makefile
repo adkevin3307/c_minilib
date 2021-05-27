@@ -26,7 +26,7 @@ $(EXE): $(OBJS_START)
 	cp $< $@
 
 $(EXE_SO): $(OBJS_LIB)
-	ld $(LDFLAGS) -o $@ $<
+	ld $(LDFLAGS) -o $@ $^
 
 clean:
 	rm -rf $(OBJ_DIR) $(EXE) $(EXE_SO)
