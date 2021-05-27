@@ -195,6 +195,7 @@ long sys_setuid(uid_t uid);
 long sys_setgid(gid_t gid);
 long sys_geteuid();
 long sys_getegid();
+long sys_alarm(unsigned int seconds);
 
 /* wrappers */
 ssize_t read(int fd, char* buf, size_t count);
@@ -230,10 +231,10 @@ int setuid(uid_t uid);
 int setgid(gid_t gid);
 uid_t geteuid();
 gid_t getegid();
-
 void bzero(void* s, size_t size);
 size_t strlen(const char* s);
 void perror(const char* prefix);
 unsigned int sleep(unsigned int s);
+unsigned int alarm(unsigned int seconds);
 
 #endif /* __LIBMINI_H__ */
