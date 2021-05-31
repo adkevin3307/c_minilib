@@ -133,13 +133,12 @@ extern long errno;
 /* from /usr/include/x86_64-linux-gnu/bits/sigaction.h */
 #define SA_NOCLDSTOP 1 /* Don't send SIGCHLD when children stop.  */
 #define SA_NOCLDWAIT 2 /* Don't create zombie on child death.  */
-#define SA_SIGINFO 4 /* Invoke signal-catching function with \
-            three arguments instead of one.  */
+#define SA_SIGINFO 4 /* Invoke signal-catching function with three arguments instead of one.  */
+
 #define SA_ONSTACK 0x08000000 /* Use signal stack by using `sa_restorer'. */
 #define SA_RESTART 0x10000000 /* Restart syscall on signal return.  */
 #define SA_INTERRUPT 0x20000000 /* Historical no-op.  */
-#define SA_NODEFER 0x40000000 /* Don't automatically block the signal when \
-                 its handler is being executed.  */
+#define SA_NODEFER 0x40000000 /* Don't automatically block the signal when its handler is being executed.  */
 #define SA_RESETHAND 0x80000000 /* Reset to SIG_DFL on entry to handler.  */
 
 #define SIG_BLOCK 0 /* Block signals.  */
@@ -160,6 +159,10 @@ struct timezone {
     int tz_minuteswest; /* minutes west of Greenwich */
     int tz_dsttime; /* type of DST correction */
 };
+
+typedef struct {
+    unsigned long int val;
+} sigset_t;
 
 /* system calls */
 long sys_read(int fd, char* buf, size_t count);
@@ -196,6 +199,8 @@ long sys_setgid(gid_t gid);
 long sys_geteuid();
 long sys_getegid();
 long sys_alarm(unsigned int seconds);
+long sys_rt_sigprocmask(int how, sigset_t* nset, sigset_t* oset, size_t sigsetsize);
+long sys_rt_sigpending(sigset_t* set, size_t sigsetsize);
 
 /* wrappers */
 ssize_t read(int fd, char* buf, size_t count);
@@ -236,5 +241,10 @@ size_t strlen(const char* s);
 void perror(const char* prefix);
 unsigned int sleep(unsigned int s);
 unsigned int alarm(unsigned int seconds);
+int sigemptyset(sigset_t* set);
+int sigaddset(sigset_t* set, int signum);
+int sigprocmask(int how, sigset_t* set, sigset_t* oset);
+int sigpending(sigset_t* set);
+int sigismember(sigset_t* set, int signum);
 
 #endif /* __LIBMINI_H__ */

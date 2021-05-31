@@ -81,7 +81,7 @@ int pause()
 
 int nanosleep(struct timespec* rqtp, struct timespec* rmtp)
 {
-    long ret = nanosleep(rqtp, rmtp);
+    long ret = sys_nanosleep(rqtp, rmtp);
     WRAPPER_RETval(int);
 }
 
@@ -288,6 +288,36 @@ void perror(const char* prefix)
 unsigned int alarm(unsigned int seconds)
 {
     long ret = sys_alarm(seconds);
+    WRAPPER_RETval(unsigned int);
+}
 
-    return ret;
+int sigemptyset(sigset_t* set)
+{
+    set->val = 0;
+
+    return 0;
+}
+
+int sigaddset(sigset_t* set, int signum)
+{
+    set->val |= (1 << (signum - 1));
+
+    return 0;
+}
+
+int sigprocmask(int how, sigset_t* set, sigset_t* oset)
+{
+    long ret = sys_rt_sigprocmask(how, set, oset, sizeof(sigset_t));
+    WRAPPER_RETval(int);
+}
+
+int sigpending(sigset_t* set)
+{
+    long ret = sys_rt_sigpending(set, sizeof(sigset_t));
+    WRAPPER_RETval(int);
+}
+
+int sigismember(sigset_t* set, int signum)
+{
+    return (set->val & (1 << (signum - 1)) ? 1 : 0);
 }
