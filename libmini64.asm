@@ -123,11 +123,13 @@ setjmp:
     mov [rdi + 40], r14
     mov [rdi + 48], r15
     mov [rdi + 56], rsi
+setjmp_quit:
     xor eax, eax
     ret
 
     global longjmp:function
 longjmp:
+    mov eax, esi
     mov rbx, [rdi]
     mov rsp, [rdi + 8]
     mov rbp, [rdi + 16]
@@ -135,4 +137,5 @@ longjmp:
     mov r13, [rdi + 32]
     mov r14, [rdi + 40]
     mov r15, [rdi + 48]
+longjmp_quit:
     jmp [rdi + 56]
