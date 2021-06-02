@@ -8,6 +8,9 @@ typedef int mode_t;
 typedef int uid_t;
 typedef int gid_t;
 typedef int pid_t;
+typedef double clock_t;
+typedef void (*__sighandler_t)(int);
+typedef __sighandler_t sighandler_t;
 
 extern long errno;
 
@@ -135,6 +138,7 @@ extern long errno;
 #define SA_NOCLDWAIT 2 /* Don't create zombie on child death.  */
 #define SA_SIGINFO 4 /* Invoke signal-catching function with three arguments instead of one.  */
 
+#define SA_RESTORER 0x04000000
 #define SA_ONSTACK 0x08000000 /* Use signal stack by using `sa_restorer'. */
 #define SA_RESTART 0x10000000 /* Restart syscall on signal return.  */
 #define SA_INTERRUPT 0x20000000 /* Historical no-op.  */
@@ -144,6 +148,10 @@ extern long errno;
 #define SIG_BLOCK 0 /* Block signals.  */
 #define SIG_UNBLOCK 1 /* Unblock signals.  */
 #define SIG_SETMASK 2 /* Set the set of blocked signals.  */
+
+#define SIG_DFL ((__sighandler_t)0) /* default signal handling */
+#define SIG_IGN ((__sighandler_t)1) /* ignore signal */
+#define SIG_ERR ((__sighandler_t)-1) /* error return from signal */
 
 struct timespec {
     long tv_sec; /* seconds */
@@ -162,7 +170,23 @@ struct timezone {
 
 typedef struct {
     unsigned long int val;
-} sigset_t;
+} __sigset_t;
+
+typedef __sigset_t sigset_t;
+
+struct sigaction {
+    sighandler_t sa_handler;
+    sigset_t sa_mask;
+    int sa_flags;
+    void (*sa_restorer)(void);
+};
+
+struct kernel_sigaction {
+    void (*k_sa_handler)(int);
+    unsigned long sa_flags;
+    void (*sa_restorer)(void);
+    unsigned long sa_mask;
+};
 
 /* system calls */
 long sys_read(int fd, char* buf, size_t count);
@@ -201,6 +225,8 @@ long sys_getegid();
 long sys_alarm(unsigned int seconds);
 long sys_rt_sigprocmask(int how, sigset_t* nset, sigset_t* oset, size_t sigsetsize);
 long sys_rt_sigpending(sigset_t* set, size_t sigsetsize);
+long sys_rt_sigaction(int signum, struct kernel_sigaction* act, struct kernel_sigaction* oact, size_t sigsetsize);
+void sys_sigreturn();
 
 /* wrappers */
 ssize_t read(int fd, char* buf, size_t count);
@@ -246,5 +272,7 @@ int sigaddset(sigset_t* set, int signum);
 int sigprocmask(int how, sigset_t* set, sigset_t* oset);
 int sigpending(sigset_t* set);
 int sigismember(sigset_t* set, int signum);
+sighandler_t signal(int signum, sighandler_t handler);
+long sigaction(int signum, struct sigaction* act, struct sigaction* oact);
 
 #endif /* __LIBMINI_H__ */

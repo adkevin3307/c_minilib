@@ -321,3 +321,46 @@ int sigismember(sigset_t* set, int signum)
 {
     return (set->val & (1 << (signum - 1)) ? 1 : 0);
 }
+
+sighandler_t signal(int signum, sighandler_t handler)
+{
+    struct sigaction act, oact;
+
+    act.sa_handler = handler;
+    sigemptyset(&(act.sa_mask));
+    sigaddset(&(act.sa_mask), signum);
+    act.sa_flags = 0;
+
+    if (signum == SIGALRM) {
+#ifdef SA_INTERRUPT
+        act.sa_flags |= SA_INTERRUPT;
+#endif
+    }
+    else {
+#ifdef SA_RESTART
+        act.sa_flags |= SA_RESTART;
+#endif
+    }
+
+    if (sigaction(signum, &act, &oact) < 0) return SIG_ERR;
+
+    return oact.sa_handler;
+}
+
+long sigaction(int signum, struct sigaction* act, struct sigaction* oact)
+{
+    struct kernel_sigaction k_act, k_oact;
+
+    k_act.k_sa_handler = act->sa_handler;
+    k_act.sa_flags = act->sa_flags | SA_RESTORER;
+    k_act.sa_mask = act->sa_mask.val;
+    k_act.sa_restorer = sys_sigreturn;
+
+    long ret = sys_rt_sigaction(signum, &k_act, &k_oact, sizeof(sigset_t));
+
+    oact->sa_handler = k_oact.k_sa_handler;
+    oact->sa_flags = k_oact.sa_flags;
+    oact->sa_mask.val = k_oact.sa_mask;
+
+    WRAPPER_RETval(long);
+}
