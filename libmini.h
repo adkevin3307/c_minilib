@@ -188,6 +188,11 @@ struct kernel_sigaction {
     unsigned long sa_mask;
 };
 
+typedef struct jmp_buf_s {
+    long long reg[8];
+    sigset_t mask;
+} jmp_buf[1];
+
 /* system calls */
 long sys_read(int fd, char* buf, size_t count);
 long sys_write(int fd, const void* buf, size_t count);
@@ -273,6 +278,8 @@ int sigprocmask(int how, sigset_t* set, sigset_t* oset);
 int sigpending(sigset_t* set);
 int sigismember(sigset_t* set, int signum);
 sighandler_t signal(int signum, sighandler_t handler);
-long sigaction(int signum, struct sigaction* act, struct sigaction* oact);
+int sigaction(int signum, struct sigaction* act, struct sigaction* oact);
+int setjmp(jmp_buf env);
+void longjmp(jmp_buf env, int val);
 
 #endif /* __LIBMINI_H__ */

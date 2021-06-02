@@ -347,7 +347,7 @@ sighandler_t signal(int signum, sighandler_t handler)
     return oact.sa_handler;
 }
 
-long sigaction(int signum, struct sigaction* act, struct sigaction* oact)
+int sigaction(int signum, struct sigaction* act, struct sigaction* oact)
 {
     struct kernel_sigaction k_act, k_oact;
 

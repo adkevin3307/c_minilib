@@ -27,7 +27,6 @@ extern	errno
 	gensys  11, munmap
     gensys  13, rt_sigaction
     gensys  14, rt_sigprocmask
-    ; gensys  15, rt_sigreturn
 	gensys  22, pipe
 	gensys  32, dup
 	gensys  33, dup2
@@ -65,7 +64,7 @@ sys_sigreturn:
 
 	global open:function
 open:
-	call	sys_open
+	call sys_open
 	cmp	rax, 0
 	jge	open_success	; no error :)
 open_error:
@@ -95,7 +94,7 @@ sleep:
 	mov	QWORD [rsp+8], 0	; req.tv_nsec
 	mov	rdi, rsp	; rdi = req @ rsp
 	lea	rsi, [rsp+16]	; rsi = rem @ rsp+16
-	call	sys_nanosleep
+	call sys_nanosleep
 	cmp	rax, 0
 	jge	sleep_quit	; no error :)
 sleep_error:
@@ -111,3 +110,29 @@ sleep_failed:
 sleep_quit:
 	add	rsp, 32
 	ret
+
+    global setjmp:function
+setjmp:
+    pop rsi
+    mov [rdi], rbx
+    mov [rdi + 8], rsp
+    push rsi
+    mov [rdi + 16], rbp
+    mov [rdi + 24], r12
+    mov [rdi + 32], r13
+    mov [rdi + 40], r14
+    mov [rdi + 48], r15
+    mov [rdi + 56], rsi
+    xor eax, eax
+    ret
+
+    global longjmp:function
+longjmp:
+    mov rbx, [rdi]
+    mov rsp, [rdi + 8]
+    mov rbp, [rdi + 16]
+    mov r12, [rdi + 24]
+    mov r13, [rdi + 32]
+    mov r14, [rdi + 40]
+    mov r15, [rdi + 48]
+    jmp [rdi + 56]
