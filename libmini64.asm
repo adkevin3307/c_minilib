@@ -114,22 +114,36 @@ sleep_quit:
     global setjmp:function
 setjmp:
     pop rsi
+    push rsi
+save_buffer:
     mov [rdi], rbx
     mov [rdi + 8], rsp
-    push rsi
     mov [rdi + 16], rbp
     mov [rdi + 24], r12
     mov [rdi + 32], r13
     mov [rdi + 40], r14
     mov [rdi + 48], r15
     mov [rdi + 56], rsi
+save_sigmask:
+    mov rdx, [rdi + 64]
+    push rdi
+    mov rdi, 0
+    mov rsi, 0
+    mov r10, 4
+    call sys_rt_sigprocmask
+    pop rdi
+    mov [rdi + 64], rdx
 setjmp_quit:
     xor eax, eax
     ret
 
     global longjmp:function
 longjmp:
-    mov eax, esi
+    mov eax, [rdi + 68]
+    test eax, eax
+    jnz restore_buffer
+    inc eax
+restore_buffer:
     mov rbx, [rdi]
     mov rsp, [rdi + 8]
     mov rbp, [rdi + 16]
@@ -137,5 +151,13 @@ longjmp:
     mov r13, [rdi + 32]
     mov r14, [rdi + 40]
     mov r15, [rdi + 48]
+restore_sigmask:
+    mov rsi, [rdi + 64]
+    push rdi
+    mov rdi, 2
+    mov rdx, 0
+    mov r10, 4
+    call sys_rt_sigprocmask
+    pop rdi
 longjmp_quit:
     jmp [rdi + 56]
