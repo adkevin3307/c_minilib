@@ -139,7 +139,7 @@ setjmp_quit:
 
     global longjmp:function
 longjmp:
-    mov eax, [rdi + 68]
+    mov eax, [rdi + 72]
     test eax, eax
     jnz restore_buffer
     inc eax
