@@ -298,9 +298,23 @@ int sigemptyset(sigset_t* set)
     return 0;
 }
 
+int sigfillset(sigset_t *set)
+{
+    set->val = -1;
+
+    return 0;
+}
+
 int sigaddset(sigset_t* set, int signum)
 {
     set->val |= (1 << (signum - 1));
+
+    return 0;
+}
+
+int sigdelset(sigset_t *set, int signum)
+{
+    set->val &= (~(1 << (signum - 1)));
 
     return 0;
 }
